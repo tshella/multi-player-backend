@@ -20,21 +20,22 @@ A scalable, fault-tolerant, real-time multiplayer game backend built using **Eli
 10. [Deployment](#deployment)
 11. [Makefile & Scripts](#makefile--scripts)
 12. [Helm / Kubernetes](#helm--kubernetes)
+13. [License](#license)
 
 ---
 
 ## ✅ Features
 
 - 🧠 Region + ELO-based **Matchmaking**
-- 🎮 Real-time **Game Loops** (tick-based GenServers)
+- 🎮 Tick-driven **Game Servers** per match
 - 🤖 **AI Bots** (GenServer + gRPC adapter for ML)
-- 🧾 **JWT Auth** (Guardian-based secure login)
-- 🔁 **Phoenix Channels** for multiplayer actions
-- 📨 **RabbitMQ + Broadway** for event streaming
-- ⚙️ **Oban background jobs** for ranking, replays, etc.
-- 📈 **Telemetry + Prometheus** metrics
-- 🔐 **Redis caching** via Nebulex
-- 📘 Dual interface: **REST + GraphQL + Swagger**
+- 🔐 **JWT Auth** (Guardian-based secure login)
+- 🔁 Real-time sync via **Phoenix Channels**
+- 📨 **RabbitMQ + Broadway** event ingestion
+- ⚙️ **Oban background jobs** for async workflows
+- 📈 **Prometheus + Telemetry** instrumentation
+- 🧠 **Redis caching** via Nebulex
+- 🧾 **REST + GraphQL + Swagger** interfaces
 
 ---
 
@@ -59,12 +60,12 @@ A scalable, fault-tolerant, real-time multiplayer game backend built using **Eli
 
 ## 🧱 Architecture Overview
 
-- One `GameServer` per match
-- Bots run as supervised actors (can integrate ML)
-- `Matchmaking` pairs players by region + ELO
-- Events published to RabbitMQ; consumed via Broadway
-- Background workers use Oban
-- Prometheus scrapes app on `/metrics`
+- `GameServer` is a GenServer per active match
+- AI bots are supervised processes using rule-based or gRPC strategies
+- `Matchmaking` queues players by ELO, region, party size
+- Game events stream via RabbitMQ to Broadway consumers
+- Ranking updates run as Oban jobs
+- Metrics and logs are collected for Prometheus and Grafana
 
 ---
 
@@ -77,9 +78,9 @@ git clone https://github.com/your-org/game_backend.git
 cd game_backend
 mix deps.get
 
-2. Setup your environment
+2. Set up your .env
 
-Create a .env file:
+Create .env in the root:
 
 DATABASE_URL=ecto://postgres:postgres@db/game_backend_dev
 SECRET_KEY_BASE=dev_secret
@@ -93,52 +94,49 @@ PORT=4000
 
 make gamer-up
 
-Or directly:
+or manually:
 
 docker compose up --build
 
-To view your backend:
-
-    App: http://localhost:4000
-
-    RabbitMQ UI: http://localhost:15672 (guest/guest)
-
-    Grafana: http://localhost:3000 (admin/admin)
-
-    Prometheus: http://localhost:9090
-
-    Swagger UI: http://localhost:4000/api-docs
-
+4. Access the interfaces
+Service	URL
+App	http://localhost:4000
+Swagger Docs	http://localhost:4000/api-docs
+RabbitMQ	http://localhost:15672
+Grafana	http://localhost:3000
+Prometheus	http://localhost:9090
 📁 Folder Structure
 
 lib/
-├── accounts/        # Guardian-based JWT auth
-├── bots/            # AI bots + gRPC adapter
-├── cache/           # Redis cache layer
-├── events/          # RabbitMQ publisher/consumer
-├── game_engine/     # Core tick-based game logic
-├── matchmaking/     # ELO + region matchmaker
-├── metrics/         # Telemetry / Prometheus
-├── ranking/         # ELO updater and Oban jobs
+├── accounts/        # JWT auth & user handling
+├── bots/            # BasicBot + gRPC adapter
+├── cache/           # Redis-based session/cache
+├── events/          # RabbitMQ publisher + Broadway
+├── game_engine/     # Core gameplay loop (GenServers)
+├── matchmaking/     # Match queues, ELO pairing
+├── metrics/         # Prometheus metrics/telemetry
+├── ranking/         # Ranking logic, Oban workers
 ├── web/             # Channels, controllers, GraphQL
 
 🔩 Key Modules
 
-    GameServer / GameSupervisor: Match logic
+    GameServer & GameSupervisor: core match lifecycle
 
-    Matchmaking: Queue + ELO pairing
+    Matchmaking: queueing, party, region-based matching
 
-    BasicBot, GrpcAdapter: AI integrations
+    BasicBot, GrpcAdapter: AI-controlled units
 
-    EventPublisher + BroadwayConsumer: RabbitMQ stream
+    EventPublisher, EventConsumer: RabbitMQ interactions
 
-    Ranking: Oban-based post-match updates
+    Ranking: ELO-based updates post-match
 
-    GameChannel, MatchmakingChannel: Real-time WebSocket
+    GameChannel: WebSocket stream per player/match
 
-    PrometheusMetrics: /metrics endpoint setup
+    PrometheusMetrics: custom telemetry setup
 
 🧪 Testing
+
+Run:
 
 mix test
 
@@ -150,7 +148,7 @@ Includes:
 
     matchmaking_test.exs
 
-    Factory: test/support/factory.ex
+    test/support/factory.ex for user/bot stubs
 
 📘 API Documentation
 
@@ -158,48 +156,55 @@ Includes:
 
     Swagger: /api-docs
 
-    GraphQL: /graphql
+    GraphQL: /graphql (via Absinthe)
 
 📈 Prometheus Metrics
 
-Accessible via:
+Available at:
 
 GET /metrics
 
-Includes:
+Tracks:
 
     game.tick.duration
 
     matchmaking.join_queue.count
 
-    oban.job.success/failure
+    oban.job.success, oban.job.failure
 
-    Phoenix channel join/message counts
+    phoenix.channel.join/message
 
 ⚙️ Makefile & Scripts
 
-Use make to simplify tasks:
+Make your life easier:
 
-make gamer-up     # Show GAMER banner + safe docker build
-make up           # Docker Compose up
-make restart      # Rebuild and restart
-make test         # Run all tests
+make gamer-up     # Safe docker build with GAMER banner
+make up           # Start Docker stack
+make restart      # Rebuild + start
+make migrate      # DB migrations
+make seed         # Seed data
+make test         # Run tests
+make lint         # Credo lint
 make format       # Format code
-make migrate      # Run DB migrations
-make seed         # Load seed data
-make shell        # Open app container shell
+make bootstrap    # Install Terraform + init infra/
 
-Includes banner in:
+🧪 Included Scripts:
 
-scripts/docker-safe-build.sh
+    scripts/docker-safe-build.sh
+
+    scripts/bootstrap.sh (Terraform installer + runner)
 
 ☸️ Helm / Kubernetes
 
-A Helm chart is included in helm/game-backend.
+Includes Helm chart at helm/game-backend.
+
+Install manually:
 
 helm install game-backend ./helm/game-backend
 
-Includes:
+Files:
+
+    values.yaml
 
     deployment.yaml
 
@@ -207,9 +212,13 @@ Includes:
 
     secret.yaml
 
-    values.yaml
-
     NOTES.txt
+
+Supports Terraform-based deployment via:
+
+cd infra/
+terraform init
+terraform apply
 
 📝 License
 

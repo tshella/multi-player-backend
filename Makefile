@@ -3,6 +3,7 @@
 APP_NAME=game_backend
 SCRIPT_DIR=scripts
 DOCKER_SAFE_SCRIPT=$(SCRIPT_DIR)/docker-safe-build.sh
+BOOTSTRAP_SCRIPT=$(SCRIPT_DIR)/bootstrap.sh
 
 # ─────────────────────────────
 # 📦 Docker Commands
@@ -33,7 +34,7 @@ gamer-up:
 	@$(DOCKER_SAFE_SCRIPT)
 
 # ─────────────────────────────
-# 🔧 Mix/Elixir
+# 🔧 Mix/Elixir Tasks
 # ─────────────────────────────
 release:
 	MIX_ENV=prod mix deps.get --only prod && \
@@ -54,3 +55,10 @@ format:
 
 lint:
 	mix credo --strict
+
+# ─────────────────────────────
+# 🌍 Infrastructure Bootstrap
+# ─────────────────────────────
+bootstrap:
+	@chmod +x $(BOOTSTRAP_SCRIPT)
+	@$(BOOTSTRAP_SCRIPT)
