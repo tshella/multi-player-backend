@@ -1,0 +1,12 @@
+{application,broadway_rabbitmq,
+             [{optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,broadway,amqp,
+                             nimble_options,telemetry]},
+              {description,"A RabbitMQ connector for Broadway"},
+              {modules,['Elixir.BroadwayRabbitMQ.AmqpClient',
+                        'Elixir.BroadwayRabbitMQ.Backoff',
+                        'Elixir.BroadwayRabbitMQ.ChannelPool',
+                        'Elixir.BroadwayRabbitMQ.Producer',
+                        'Elixir.BroadwayRabbitMQ.RabbitmqClient']},
+              {registered,[]},
+              {vsn,"0.8.2"}]}.
