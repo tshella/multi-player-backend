@@ -10,6 +10,18 @@ defmodule GameBackend.Ranking do
   @k_factor 32
 
   @doc """
+  Returns the top 10 users ordered by ELO descending.
+  """
+  def get_leaderboard do
+    import Ecto.Query
+
+    User
+    |> order_by([u], desc: u.elo)
+    |> limit(10)
+    |> Repo.all()
+  end
+
+  @doc """
   Processes results from a completed match and updates each player's ELO.
   `results` is a list of maps: [%{id: "p1", score: 20}, %{id: "p2", score: 10}]
   """

@@ -31,7 +31,7 @@ defmodule GameBackend.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_live_dashboard, "~> 0.7"},
       {:phoenix_swagger, "~> 0.8"},
-      {:cors_plug, "~> 3.0"},         # ✅ Added for CORS support
+      {:cors_plug, "~> 3.0"},
 
       # Ecto + DB
       {:ecto_sql, "~> 3.7"},
@@ -64,7 +64,9 @@ defmodule GameBackend.MixProject do
       # Utilities
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:gettext, "~> 0.20"},  # ✅ Used by GameBackendWeb (now Gettext.Backend-based)
+      {:gettext, "~> 0.20"},
+      {:elixir_uuid, "~> 1.2"},
+      {:bcrypt_elixir, "~> 3.0"},
 
       # gRPC
       {:grpc, github: "elixir-grpc/grpc", override: true}
