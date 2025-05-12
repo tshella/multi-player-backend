@@ -1,0 +1,36 @@
+# Mix
+/_build
+/deps
+/mix.lock
+
+# Compiled assets and temporary files
+/assets/node_modules
+/assets/build
+/priv/static
+*.ez
+*.beam
+*.dump
+
+# VCS and editor files
+.git
+.gitignore
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+.DS_Store
+.idea
+.vscode
+
+# Test and coverage
+/test
+/cover
+*.coverdata
+
+# Docker
+docker-compose.override.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+docker-compose.pod.yml
+Dockerfile.dev
