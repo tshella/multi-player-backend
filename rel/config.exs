@@ -38,6 +38,6 @@ config :game_backend, Oban,
   ],
   plugins: [Oban.Plugins.Pruner]
 
-# Prometheus
+# Prometheus metrics
 config :game_backend, :telemetry_metrics,
   prometheus_port: String.to_integer(System.get_env("PROMETHEUS_PORT") || "9090")

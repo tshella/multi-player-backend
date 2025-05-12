@@ -7,54 +7,58 @@ ENV MIX_ENV=prod
 
 # Install system dependencies
 RUN apk add --no-cache \
-    build-base \
-    git \
-    npm \
-    python3 \
-    postgresql-dev \
-    curl \
-    openssl \
-    inotify-tools
+  build-base \
+  git \
+  npm \
+  python3 \
+  postgresql-dev \
+  curl \
+  openssl \
+  inotify-tools
 
-# Create and set working directory
 WORKDIR /app
 
-# Copy mix files
-COPY mix.exs mix.lock ./
+# Copy mix.exs and optionally mix.lock if it exists
+COPY mix.exs ./
 
-# Copy config and install deps
+# Attempt to copy mix.lock via shell logic to avoid breaking the build
+# This will only succeed if mix.lock is present in the build context
+RUN test -f mix.lock && cp mix.lock . || echo "⚠️  mix.lock not found, skipping."
+
+# Copy config and install dependencies
 COPY config ./config
-RUN mix do local.hex --force, local.rebar --force, deps.get --only=prod
+RUN mix local.hex --force && mix local.rebar --force
 
-# Copy the rest of the application
+# If mix.lock was not copied, generate it
+RUN test -f mix.lock || mix deps.get
+RUN mix deps.get --only=prod
+
+# Copy all application code
 COPY . .
 
-# Compile the project and build release
+# Compile and release
 RUN mix deps.compile
 RUN mix compile
-RUN mix assets.deploy || true  # skip if no assets
+RUN mix assets.deploy || true
 RUN mix release
 
 # ─────────────────────────────
-# Stage 2: Final Image (runtime)
+# Stage 2: Runtime
 # ─────────────────────────────
 FROM alpine:3.19.1 AS app
 
 RUN apk add --no-cache openssl ncurses-libs libstdc++ bash
 
 ENV MIX_ENV=prod \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    REPLACE_OS_VARS=true \
-    HOME=/app
+  LANG=en_US.UTF-8 \
+  LC_ALL=en_US.UTF-8 \
+  REPLACE_OS_VARS=true \
+  HOME=/app
 
 WORKDIR /app
 
-# Copy release from build stage
 COPY --from=builder /app/_build/prod/rel/game_backend ./
 
-# Expose Phoenix port
 EXPOSE 4000
 
-# Command to run the release
 CMD ["bin/game_backend", "start"]
