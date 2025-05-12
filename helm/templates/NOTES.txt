@@ -1,0 +1,43 @@
+🎮 Game Backend Deployed Successfully!
+
+Release name: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+🚀 Your Elixir/Phoenix multiplayer game backend is now running.
+
+📡 Access the application:
+{{- if (eq .Values.service.type "LoadBalancer") }}
+  External IP (may take a few seconds): Run `kubectl get svc {{ include "game-backend.fullname" . }}`
+  Port: {{ .Values.service.port }}
+  URL:  http://<EXTERNAL-IP>:{{ .Values.service.port }}
+{{- else if (eq .Values.service.type "NodePort") }}
+  NodePort: Run `kubectl get svc {{ include "game-backend.fullname" . }}`
+  Port: {{ .Values.service.port }}
+{{- else }}
+  Port-forward access:
+    kubectl port-forward svc/{{ include "game-backend.fullname" . }} 4000:4000
+    Then visit: http://localhost:4000
+{{- end }}
+
+🔐 Admin Secrets:
+  - Guardian Secret: Set via `GUARDIAN_SECRET`
+  - Phoenix Secret Key Base: Set via `SECRET_KEY_BASE`
+
+💾 Connected Services:
+  - PostgreSQL: accessible at `postgres:5432`
+  - Redis: accessible at `redis:6379`
+  - RabbitMQ (if used): `rabbitmq:5672` / mgmt UI: `:15672`
+
+📈 Prometheus metrics (if exposed):
+  GET http://<EXTERNAL-IP>:9090/metrics
+
+📘 API Docs:
+  GET http://<EXTERNAL-IP>/api-docs
+
+🧪 To test:
+  Run: `kubectl logs -f deployment/{{ include "game-backend.fullname" . }}`
+
+To uninstall this release:
+  helm uninstall {{ .Release.Name }}
+
+Happy deploying 👾

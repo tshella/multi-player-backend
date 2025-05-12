@@ -1,0 +1,20 @@
+replicaCount: 2
+
+image:
+  repository: your-dockerhub-username/game_backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+
+env:
+  MIX_ENV: prod
+  DATABASE_URL: "ecto://postgres:postgres@postgres:5432/game_backend_prod"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+
+secretEnv:
+  SECRET_KEY_BASE: "yhu7nlqvznqak1s8mtefpfj03f"
+  GUARDIAN_SECRET: "83bd0dba-aabd-43fa-b501-39183d5f4860"

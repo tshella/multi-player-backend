@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-backend
+  labels:
+    app: game-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-backend
+  template:
+    metadata:
+      labels:
+        app: game-backend
+    spec:
+      containers:
+        - name: game-backend
+          image: your-dockerhub-username/game_backend:latest
+          ports:
+            - containerPort: 4000
+          env:
+            - name: MIX_ENV
+              value: "prod"
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: secret_key_base
+            - name: GUARDIAN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: guardian_secret
+            - name: DATABASE_URL
+              value: "ecto://postgres:postgres@postgres:5432/game_backend_prod"
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: game-backend
+spec:
+  selector:
+    app: game-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4000
+  type: LoadBalancer

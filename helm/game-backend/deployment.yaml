@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "game-backend.fullname" . }}
+  labels:
+    app: {{ include "game-backend.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "game-backend.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "game-backend.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 4000
+          env:
+            - name: MIX_ENV
+              value: {{ .Values.env.MIX_ENV }}
+            - name: DATABASE_URL
+              value: {{ .Values.env.DATABASE_URL }}
+            - name: REDIS_HOST
+              value: {{ .Values.env.REDIS_HOST }}
+            - name: REDIS_PORT
+              value: {{ .Values.env.REDIS_PORT }}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: game-backend-secret
+                  key: SECRET_KEY_BASE
+            - name: GUARDIAN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: game-backend-secret
+                  key: GUARDIAN_SECRET
