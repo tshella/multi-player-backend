@@ -1,21 +1,82 @@
-version: "3.9"
+#version: "3.9"
 
 services:
   db:
     image: postgres:15
+    container_name: game_backend_db
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: game_backend_dev
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: game_backend_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:5672"     # RabbitMQ (AMQP)
+      - "15672:15672"   # RabbitMQ Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   prometheus:
     image: prom/prometheus
+    container_name: game_backend_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
   grafana:
     image: grafana/grafana
+    container_name: game_backend_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  redis:
+    image: redis:7-alpine
+    container_name: game_backend_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  game_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: game_backend_app
+    environment:
+      MIX_ENV: dev
+      DATABASE_URL: ecto://postgres:postgres@db/game_backend_dev
+      SECRET_KEY_BASE: dev_secret_key
+      GUARDIAN_SECRET: dev_guardian_secret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PROMETHEUS_PORT: 9090
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    volumes:
+      - .:/app
+    command: mix phx.server
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+  rabbitmq_data:
