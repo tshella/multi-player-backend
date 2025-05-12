@@ -16,37 +16,57 @@ defmodule GameBackend.MixProject do
   def application do
     [
       mod: {GameBackend.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :gettext]
     ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-
   defp deps do
     [
+      # Phoenix + Web
       {:phoenix, "~> 1.7"},
       {:phoenix_pubsub, "~> 2.1"},
       {:phoenix_ecto, "~> 4.4"},
+      {:phoenix_live_dashboard, "~> 0.7"},
+      {:phoenix_swagger, "~> 0.8"},
+      {:cors_plug, "~> 3.0"},         # ✅ Added for CORS support
+
+      # Ecto + DB
       {:ecto_sql, "~> 3.7"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_dashboard, "~> 0.7"},
-      {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"},
-      {:oban, "~> 2.15"},
-      {:guardian, "~> 2.0"},
+
+      # Real-time + Messaging
       {:broadway, "~> 1.0"},
       {:broadway_rabbitmq, "~> 0.7"},
-      {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"},
-      {:phoenix_swagger, "~> 0.8"},
-      {:absinthe, "~> 1.7"},
-      {:absinthe_plug, "~> 1.5"},
       {:libcluster, "~> 3.3"},
       {:horde, "~> 0.8.7"},
+
+      # Background jobs
+      {:oban, "~> 2.15"},
+
+      # Auth
+      {:guardian, "~> 2.0"},
+
+      # API + GraphQL
+      {:absinthe, "~> 1.7"},
+      {:absinthe_plug, "~> 1.5"},
+
+      # Caching
       {:nebulex, "~> 2.4"},
       {:nebulex_redis_adapter, "~> 2.4"},
+
+      # Telemetry + Metrics
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 1.0"},
+
+      # Utilities
+      {:jason, "~> 1.2"},
+      {:plug_cowboy, "~> 2.5"},
+      {:gettext, "~> 0.20"},  # ✅ Used by GameBackendWeb (now Gettext.Backend-based)
+
+      # gRPC
       {:grpc, github: "elixir-grpc/grpc", override: true}
     ]
   end

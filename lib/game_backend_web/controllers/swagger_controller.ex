@@ -1,7 +1,10 @@
-efmodule GameBackendWeb.SwaggerController do
+defmodule GameBackendWeb.SwaggerController do
   use GameBackendWeb, :controller
   use PhoenixSwagger
 
+  @doc """
+  Swagger schema definitions for API types.
+  """
   def swagger_definitions do
     %{
       User: swagger_schema do
