@@ -14,7 +14,8 @@
                         'Elixir.GameBackend.GameEngine.GameSupervisor',
                         'Elixir.GameBackend.GameEngine.TickHandler',
                         'Elixir.GameBackend.Repo',
-                        'Elixir.GameBackend.Telemetry']},
+                        'Elixir.GameBackend.Telemetry',
+                        'Elixir.GameBackendWeb.GameChannel']},
               {registered,[]},
               {vsn,"0.1.0"},
               {mod,{'Elixir.GameBackend.Application',[]}}]}.
