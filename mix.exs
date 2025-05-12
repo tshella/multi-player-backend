@@ -67,6 +67,7 @@ defmodule GameBackend.MixProject do
       {:gettext, "~> 0.20"},
       {:elixir_uuid, "~> 1.2"},
       {:bcrypt_elixir, "~> 3.0"},
+      {:ex_json_schema, "~> 0.9"},
 
       # gRPC
       {:grpc, github: "elixir-grpc/grpc", override: true}
